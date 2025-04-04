@@ -1,0 +1,15 @@
+{
+  "name": "clr-js",
+  "version": "1.0.0",
+  "description": "Rename variables previously renamed by \"obfuscator.io\", that is, transforming \"_0x1234\" into \"v1\". This process helps the manual deobfuscating of such obfuscated scripts.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "estrellas",
+  "license": "ISC",
+  "dependencies": {
+    "acorn": "^8.14.1",
+    "acorn-walk": "^8.3.4"
+  }
+}
