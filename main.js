@@ -1,21 +1,29 @@
-import { read_file, FileOperations } from './file.js';
+import { read_file, FILE_OPERATIONS } from './file.js';
 import * as name_generator from './generator.js'
+import * as arg_handler from './arguments.js'
 
 import { parse } from 'acorn';
 import * as walk from 'acorn-walk';
 import { normalize } from 'node:path';
 import process from 'node:process';
 
-let is_read = read_file(process.argv[2]);
+let program_options = arg_handler.read_args();
+if(program_options.file_arg === false) {
+    arg_handler.show_help();
+    process.exit(0);
+}
+
+let obfuscated_file_name = arg_handler.get_file_name_from_argv(program_options.file_arg_index)
+let is_read = read_file(obfuscated_file_name);
 
 switch(is_read.code) {
-    case FileOperations.OP_NOT_SUPPORTED:
-    case FileOperations.FILE_DOES_NOT_EXIST:
-    case FileOperations.FAILED:
+    case FILE_OPERATIONS.OP_NOT_SUPPORTED:
+    case FILE_OPERATIONS.FILE_DOES_NOT_EXIST:
+    case FILE_OPERATIONS.FAILED:
         console.log(`[-] Read operation failed.`);
         process.exit(1);
-    case FileOperations.SUCCESS:
-        console.log(`[-] Successfully read file ${process.argv[2]}.`);
+    case FILE_OPERATIONS.SUCCESS:
+        console.log(`[-] Successfully read file ${obfuscated_file_name}.`);
         var file_content = is_read.data;
         break;  
 }
@@ -42,9 +50,3 @@ walk.simple(node, {
         }
     }
 });
-
-console.log(name_generator.get_new_const_name())
-console.log(name_generator.get_new_const_name())
-console.log(name_generator.get_new_const_name())
-console.log(name_generator.get_new_const_name())
-console.log(name_generator.get_new_const_name())
