@@ -24,3 +24,21 @@ var new_const_id = (() => {
 export const get_new_const_name = () => {
     return 'const_' + new_const_id().toString();
 }
+
+var new_arg_id = (() => {
+    var arg_id = 0;
+    return function() { return arg_id++; };
+})();
+
+export const get_new_arg_name = () => {
+    return 'a' + new_arg_id().toString();
+}
+
+var new_label_id = (() => {
+    var label_id = 0;
+    return function() { return label_id++; };
+})();
+
+export const get_new_label_name = () => {
+    return 'label_' + new_label_id().toString();
+}

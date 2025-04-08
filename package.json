@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "acorn": "^8.14.1",
-    "acorn-walk": "^8.3.4"
+    "acorn-walk": "^8.3.4",
+    "escodegen": "^2.1.0"
   }
 }
