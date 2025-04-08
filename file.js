@@ -37,3 +37,7 @@ export const read_file = (filename) => {
         data: buffer
     }
 }
+
+export const write_to_file = (filename, code) => {
+    fs.writeFile(filename, code, (err) => { if (err) throw err; });
+}

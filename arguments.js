@@ -3,9 +3,11 @@ import process from 'node:process';
 export const PROGRAM_OPTIONS = {
     // The plan is to, well, add more features in the near future
     file_arg: false,
-    file_arg_index: 0
-}
+    file_arg_index: 0,
 
+    output_arg: false,
+    output_arg_index: 0
+}
 
 export const read_args = () => {
     process.argv.forEach((val, index) => {
@@ -13,8 +15,12 @@ export const read_args = () => {
             PROGRAM_OPTIONS.file_arg = true;
             PROGRAM_OPTIONS.file_arg_index = index;
         }
-    })
 
+        if(val.includes('-o')) {
+            PROGRAM_OPTIONS.output_arg = true;
+            PROGRAM_OPTIONS.output_arg_index = index;
+        }
+    })
     return PROGRAM_OPTIONS
 }
 
@@ -34,5 +40,6 @@ export const show_help = () => {
         Options:
 
         -f        The .js file
+        -o        The output file (default is to print on console)
         `)
 }

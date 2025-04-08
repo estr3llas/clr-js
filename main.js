@@ -1,4 +1,4 @@
-import { read_file, FILE_OPERATIONS } from './file.js';
+import { read_file, write_to_file, FILE_OPERATIONS } from './file.js';
 import * as name_generator from './generator.js'
 import * as arg_handler from './arguments.js'
 
@@ -110,7 +110,7 @@ function getValueByKey(map, key) {
         }
     });
 
-    const generatedCode = escodegen.generate(node, {
+    const generated_code = escodegen.generate(node, {
         format: {
             indent: {
                 style: '    ',
@@ -122,6 +122,13 @@ function getValueByKey(map, key) {
         }
     });
 
-    console.log(generatedCode);
+    if(program_options.output_arg === false) {
+        console.log("[+] Renamed Output:");
+        console.log(generated_code);
+        process.exit(0);
+    }
+
+    let output_filename = arg_handler.get_file_name_from_argv(program_options.output_arg_index);
+    write_to_file(output_filename, generated_code);
 
 })();
