@@ -42,3 +42,12 @@ var new_label_id = (() => {
 export const get_new_label_name = () => {
     return 'label_' + new_label_id().toString();
 }
+
+var new_import_id = (() => {
+    var import_id = 0;
+    return function() { return import_id++; };
+})();
+
+export const get_new_import_name = () => {
+    return 'import_' + new_import_id().toString();
+}
