@@ -2,17 +2,17 @@
 Rename variables previously renamed by \"obfuscator.io\", that is, transforming "_0x1234" into "v1". This process helps the manual deobfuscation of such obfuscated scripts.
 
 ```
-        CLR-JS
-        Rename variables previously renamed by "obfuscator.io", that is, transforming "_0x1234" into "v1" for example.
-        This process helps the manual deobfuscation of such obfuscated scripts.",
+CLR-JS
+Rename variables previously renamed by "obfuscator.io", that is, transforming "_0x1234" into "v1" for example.
+This process helps the manual deobfuscation of such obfuscated scripts.",
 
-        Usage:
+Usage:
         node main.js -f [obfuscated.js]
 
-        Options:
+Options:
 
-        -f        The .js file
-        -o        The output file (default is to print on console)
+-f        The .js file
+-o        The output file (default is to print on console)
 ```
 
 Example Input:
