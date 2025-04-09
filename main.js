@@ -53,14 +53,14 @@ import escodegen from 'escodegen';
                     let original_name = node.id.name;
                     let new_name = '';
         
-                    let declarationKind = '';
+                    let declaration_kind = '';
                     walk.ancestor(node, (ancestor) => {
                         if (ancestor.type === 'VariableDeclaration') {
-                            declarationKind = ancestor.kind;
+                            declaration_kind = ancestor.kind;
                         }
                     });
         
-                    switch (declarationKind) {
+                    switch (declaration_kind) {
                         case 'const':
                             new_name = name_generator.get_new_const_name();
                             break;
@@ -119,7 +119,6 @@ import escodegen from 'escodegen';
             case 'ImportDefaultSpecifier':
             case 'ImportNamespaceSpecifier': 
                 if(!name_mapping.has(node.local.name)){
-                    console.log(node)
                     let original_name = node.local.name;
                     let new_name = name_generator.get_new_import_name();
         
@@ -127,7 +126,17 @@ import escodegen from 'escodegen';
                     console.log(`    [i] Import ${original_name} renamed to: ${new_name}`);
                     name_mapping.set(original_name, new_name);
                 }
-                break;                
+                break;     
+            case 'TryStatement':
+                if(node.handler.type === 'CatchClause' && !name_mapping.has(node.handler.param.name)) {
+                    let original_name = node.handler.param.name;
+                    let new_name = name_generator.get_new_catch_clause_name();
+        
+                    console.log(`[+] Found Catch clause: ${original_name}`);
+                    console.log(`    [i] Catch clause ${original_name} renamed to: ${new_name}`);
+                    name_mapping.set(original_name, new_name);
+                }
+                break;
         }
     });
     

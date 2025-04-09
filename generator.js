@@ -51,3 +51,12 @@ var new_import_id = (() => {
 export const get_new_import_name = () => {
     return 'import_' + new_import_id().toString();
 }
+
+var new_catch_clause_id = (() => {
+    var catch_clause_id = 0;
+    return function() { return catch_clause_id++; };
+})();
+
+export const get_new_catch_clause_name = () => {
+    return 'catch_' + new_catch_clause_id().toString();
+}
