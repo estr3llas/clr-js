@@ -1,10 +1,10 @@
 # clr-js
-Rename variables previously renamed by \"obfuscator.io\", that is, transforming "_0x1234" into "v1". This process helps the manual deobfuscation of such obfuscated scripts.
+Rename variables previously renamed by \"obfuscator.io\", that is, renaming "_0x1234" into "v1", for example.. This process helps the manual deobfuscation of such obfuscated scripts.
 
 ```
 CLR-JS
-Rename variables previously renamed by "obfuscator.io", that is, transforming "_0x1234" into "v1" for example.
-This process helps the manual deobfuscation of such obfuscated scripts.",
+Rename variables previously renamed by "obfuscator.io", that is, renaming "_0x1234" into "v1", for example.
+This process helps the manual deobfuscation of such obfuscated scripts.
 
 Usage:
         node main.js -f [obfuscated.js]
@@ -24,6 +24,7 @@ Example Input:
 Example Output:
 
 ```js
+[+] Renamed Output:
 (function (a0, a1) {
     var v0 = sub_0, v1 = a0();
     while (!![]) {
@@ -33,18 +34,18 @@ Example Output:
                 break;
             else
                 v1['push'](v1['shift']());
-        } catch (_0x3e44b9) {
+        } catch (catch_0) {
             v1['push'](v1['shift']());
         }
     }
 }(sub_1, 738648));
-function sub_0(a2, a3) {
+function sub_0(a4, a5) {
     var v3 = sub_1();
-    return sub_0 = function (_0x376719, _0x2340ee) {
-        _0x376719 = _0x376719 - 151;
-        var v4 = v3[_0x376719];
+    return sub_0 = function (a2, a3) {
+        a2 = a2 - 151;
+        var v4 = v3[a2];
         return v4;
-    }, sub_0(a2, a3);
+    }, sub_0(a4, a5);
 }
 function sub_1() {
     var v5 = [

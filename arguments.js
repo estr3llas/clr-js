@@ -30,12 +30,12 @@ export const get_file_name_from_argv = (idx) => {
 
 export const show_help = () => {
     console.log(`
-        CLR-JS 
-        Rename variables previously renamed by "obfuscator.io", that is, transforming "_0x1234" into "v1" for example. 
-        This process helps the manual deobfuscation of such obfuscated scripts.",
+        CLR-JS
+        Rename variables previously renamed by "obfuscator.io", that is, renaming "_0x1234" into "v1", for example.
+        This process helps the manual deobfuscation of such obfuscated scripts.
 
         Usage:
-        node main.js -f [obfuscated.js]
+                node main.js -f [obfuscated.js]
 
         Options:
 
