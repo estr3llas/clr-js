@@ -7,6 +7,11 @@ import * as walk from 'acorn-walk';
 import process from 'node:process';
 import escodegen from 'escodegen';
 
+/**
+ * Creates a mapping of original identifiers to their new names
+ * @param {Object} ast - The (obfuscated) AST to analyze
+ * @returns {Map} - A mapping of original (_0x1234) names to new names (v1)
+ */
 const rename_ast = (ast) => {
     const mapping = new Map();
 
@@ -14,9 +19,6 @@ const rename_ast = (ast) => {
         switch(node.type) {
             case 'VariableDeclarator': {
                 if (node.id.type === 'Identifier' && !mapping.has(node.id.name)) {
-                    let original_name = node.id.name;
-                    let new_name = '';
-        
                     let declaration_kind = '';
                     walk.ancestor(node, (ancestor) => {
                         if (ancestor.type === 'VariableDeclaration') {
@@ -24,6 +26,8 @@ const rename_ast = (ast) => {
                         }
                     });
         
+                    let original_name = node.id.name;
+                    let new_name = '';
                     switch (declaration_kind) {
                         case 'const':
                             new_name = name_generator.get_new_const_name();
@@ -47,38 +51,43 @@ const rename_ast = (ast) => {
                     console.log(`    [i] Function ${original_name} renamed to: ${new_name}\n`);
                     mapping.set(original_name, new_name);
 
-                    node.params.forEach(param => {
-                        if (param.type === 'Identifier' && !mapping.has(param.name)) {
+                    node.params
+                    ?.filter( p => p.type === 'Identifier' && !mapping.has(p.name))
+                    .forEach(param => {
                             let original_param_name = param.name;
                             let new_param_name = name_generator.get_new_arg_name();
                             console.log(`    [i] Parameter ${original_param_name} renamed to: ${new_param_name}\n`);
                             mapping.set(original_param_name, new_param_name);
-                        }
-                    });
+                        });
                 }
                 break;
             }
             case 'FunctionExpression': {
-                node.params.forEach(param => {
-                    if (!mapping.has(param.name) && param.type === 'Identifier'){
+                node.params
+                ?.filter( p => p.type === 'Identifier' && !mapping.has(p.name))
+                .forEach(param => {
                         console.log(`[+] Found FunctionExpression with params: (${node.params.map(p => p.name).join(', ')})`);
                         let original_param_name = param.name;
                         let new_param_name = name_generator.get_new_arg_name();
                         console.log(`    [i] Parameter ${original_param_name} renamed to: ${new_param_name}\n`);
                         mapping.set(original_param_name, new_param_name);
-                    }
-                });
-                break;
-            }
-            case 'CallExpression':
-                if (node.callee.type === 'FunctionExpression') {
-                    node.callee.params.forEach(param => {
-                        if (param.type === 'Identifier' && !mapping.has(param.name)) {
-                            const new_name = name_generator.get_new_arg_name();
-                            console.log(`[+] Found IIFE parameter: ${param.name} renamed to: ${new_name}\n`);
-                            mapping.set(param.name, new_name);
-                        }
                     });
+
+                };
+            break;
+            case 'CallExpression': {
+                if (node.callee.type === 'FunctionExpression') {
+
+                    node.callee.params
+                    ?.filter( p => p.type === 'Identifier' && !mapping.has(p.name))
+                    .forEach(param => {
+                            let original_name = param.name;
+                            let new_name = name_generator.get_new_arg_name();
+                            console.log(`[+] Found IIFE parameter: ${param.name} renamed to: ${new_name}\n`);
+                            mapping.set(original_name, new_name);
+                        });
+
+                    };
                 }
                 break;
             case 'LabeledStatement': {
@@ -92,16 +101,19 @@ const rename_ast = (ast) => {
                 }
                 break;
             }
+            case 'ImportSpecifier':
             case 'ImportDefaultSpecifier':
             case 'ImportNamespaceSpecifier': 
-                if(!mapping.has(node.local.name)){
-                    let original_name = node.local.name;
-                    let new_name = name_generator.get_new_import_name();
-        
+            if (node.local && node.local.type === 'Identifier') {
+                const original_name = node.local.name;
+                if (!mapping.has(original_name)) {
+                    const new_name = name_generator.get_new_import_name();
+                    
                     console.log(`[+] Found import: ${original_name}`);
                     console.log(`    [i] Import ${original_name} renamed to: ${new_name}\n`);
                     mapping.set(original_name, new_name);
                 }
+            }
                 break;     
             case 'TryStatement':
                 if(node.handler.type === 'CatchClause' && !mapping.has(node.handler.param.name)) {
@@ -119,6 +131,12 @@ const rename_ast = (ast) => {
     return mapping;
 }
 
+/**
+ * Applies the name mapping to the AST
+ * @param {Object} ast - The AST to modify
+ * @param {Map} mapping - The name mapping to apply
+ * @returns {Object} - The modified (renamed) AST
+ */
 const apply_mapping = (ast, mapping) => {
     walk.full(ast, (node) => {
         if (node.type === 'Identifier' && mapping.has(node.name)) {
@@ -129,6 +147,11 @@ const apply_mapping = (ast, mapping) => {
     return ast;
 }
 
+/**
+ * Generates code from an AST
+ * @param {Object} ast - The AST to generate code from
+ * @returns {string} - The generated code
+ */
 const generate_code = (ast) => {
     return escodegen.generate(ast, {
         format: {
@@ -144,7 +167,7 @@ const generate_code = (ast) => {
 
 }
 
-// It is not ascii.
+// It is not ascii. =)
 const show_ascii = () => {
     console.log("          CLR-JS")
     console.log("        ----------\n")
@@ -181,28 +204,31 @@ const show_ascii = () => {
     
     show_ascii();
 
-    const ast = parse(
-        file_buffer, 
-        {   
+    try {
+        const ast = parse(file_buffer, {
             ecmaVersion: "latest",
             sourceType: "module"
+        });
+
+        const mapping = rename_ast(ast);
+        apply_mapping(ast, mapping);
+        const generated_code = generate_code(ast);
+
+        if (program_options.output_arg === false) {
+            console.log("[+] Renamed Output:");
+            console.log(generated_code);
+            return;
         }
-    );
 
-    const mapping = rename_ast(ast);
-    
-    apply_mapping(ast, mapping);
-
-    const generated_code = generate_code(ast);
-
-    if(program_options.output_arg === false) {
-        console.log("[+] Renamed Output:");
-        console.log(generated_code);
-        process.exit(0);
+        const output_filename = arg_handler.get_file_name_from_argv(program_options.output_arg_index);
+        write_to_file(output_filename, generated_code);
+        console.log(`[i] Output file written to: ${output_filename}.`);
+    } catch (error) {
+        console.error(`[-] Error processing file: ${error.message}`);
+        if (error.stack) {
+            console.error(error.stack);
+        }
+        process.exit(1);
     }
-
-    let output_filename = arg_handler.get_file_name_from_argv(program_options.output_arg_index);
-    write_to_file(output_filename, generated_code);
-    console.log(`[i] Output file written to: ${output_filename}.`);
 
 })();

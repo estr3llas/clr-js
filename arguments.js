@@ -11,12 +11,12 @@ export const PROGRAM_OPTIONS = {
 
 export const read_args = () => {
     process.argv.forEach((val, index) => {
-        if(val.includes('-f')){
+        if(val.includes('-f') || val.includes('--file')){
             PROGRAM_OPTIONS.file_arg = true;
             PROGRAM_OPTIONS.file_arg_index = index;
         }
 
-        if(val.includes('-o')) {
+        if(val.includes('-o') || val.includes('--output')) {
             PROGRAM_OPTIONS.output_arg = true;
             PROGRAM_OPTIONS.output_arg_index = index;
         }
@@ -39,7 +39,7 @@ export const show_help = () => {
 
         Options:
 
-        -f        The .js file
-        -o        The output file (default is to print on console)
+        -f, --file          The .js file
+        -o, --output        The output file (default is to print on console)
         `)
 }
