@@ -35,7 +35,7 @@ export const show_help = () => {
         This process helps the manual deobfuscation of such obfuscated scripts.
 
         Usage:
-                node main.js -f [obfuscated.js]
+                node clr.js -f [obfuscated.js]
 
         Options:
 
