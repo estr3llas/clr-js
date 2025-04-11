@@ -7,7 +7,7 @@ Rename variables previously renamed by "obfuscator.io", that is, renaming "_0x12
 This process helps the manual deobfuscation of such obfuscated scripts.
 
 Usage:
-        node main.js -f [obfuscated.js]
+        node clr.js -f [obfuscated.js]
 
 Options:
 
