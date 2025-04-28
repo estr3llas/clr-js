@@ -7,6 +7,14 @@ import * as walk from 'acorn-walk';
 import process from 'node:process';
 import escodegen from 'escodegen';
 
+const from_raw_to_value = (ast) => {
+    walk.full(ast, (node) => {
+        if (node.type === 'VariableDeclarator' && node.init?.type === 'Literal') {
+            delete node.init.raw;
+        }
+    })
+}
+
 /**
  * Creates a mapping of original identifiers to their new names
  * @param {Object} ast - The (obfuscated) AST to analyze
@@ -167,7 +175,7 @@ const generate_code = (ast) => {
 
 }
 
-// It is not ascii. =)
+// It is not actually ascii art. =)
 const show_ascii = () => {
     console.log("          CLR-JS")
     console.log("        ----------\n")
@@ -183,17 +191,16 @@ const show_ascii = () => {
 
     let obfuscated_file_name = arg_handler.get_file_name_from_argv(program_options.file_arg_index)
     let file_buffer = read_file(obfuscated_file_name);
-    let errorMessage = null;
 
     switch(file_buffer) {
         case 'FILE_NOT_FOUND':
-            errorMessage = `[-] The file ${obfuscated_file_name} was not found.`;
+            var errorMessage = `[-] The file ${obfuscated_file_name} was not found.`;
             break;
         case 'OP_NOT_SUPPORTED':
-            errorMessage = `[-] Operation not supported on ${process.platform}.`;
+            var errorMessage = `[-] Operation not supported on ${process.platform}.`;
             break;
         case 'FAILED':
-            errorMessage = `[-] Operation failed.`;
+            var errorMessage = `[-] Operation failed.`;
             break;
     }
 
@@ -210,6 +217,7 @@ const show_ascii = () => {
             sourceType: "module"
         });
 
+        from_raw_to_value(ast);
         const mapping = rename_ast(ast);
         apply_mapping(ast, mapping);
         const generated_code = generate_code(ast);
