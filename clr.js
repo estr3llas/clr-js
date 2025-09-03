@@ -242,13 +242,13 @@ const passes = [
             return context.code || context.ast;
         })(ast, passes);
 
-        if (program_options.output_arg === false) {
+        if (args.output_arg === false) {
             console.log("[+] Renamed Output:");
             console.log(generated_code);
             return;
         }
 
-        const output_filename = arg_handler.get_file_name_from_argv(program_options.output_arg_index);
+        const output_filename = arg_handler.get_file_name_from_argv(args.output_arg_index);
         write_to_file(output_filename, generated_code);
         console.log(`[i] Output file written to: ${output_filename}.`);
     } catch (error) {
