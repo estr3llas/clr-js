@@ -98,6 +98,20 @@ const rename_ast = (ast) => {
                     };
                 }
                 break;
+            case 'SequenceExpression': {
+                node.expressions?.forEach(expression => {
+                    if (expression.type === 'Identifier' && !mapping.has(expression.name)) {
+                        let original_name = expression.name;
+                        let new_name = name_generator.get_new_arg_name();
+
+                        mapping.set(original_name, new_name);
+
+                        console.log(`[+] Found sequence expression identifier: ${original_name}`);
+                        console.log(`    [i] Sequence identifier ${original_name} renamed to: ${new_name}\n`);
+                    }
+                });
+                break;
+            }
             case 'LabeledStatement': {
                 if (node.label.type === 'Identifier' && !mapping.has(node.label.name)) {
                     let original_name = node.label.name;
@@ -133,6 +147,49 @@ const rename_ast = (ast) => {
                     mapping.set(original_name, new_name);
                 }
                 break;
+            case 'ObjectExpression': {
+                node.properties?.forEach(property => {
+                    if (property.type === 'Property' && 
+                        property.key && 
+                        property.key.type === 'Identifier' && 
+                        !mapping.has(property.key.name)) {
+                        
+                        let original_name = property.key.name;
+                        let new_name = name_generator.get_new_property_id();
+
+                        mapping.set(original_name, new_name);
+
+                        console.log(`[+] Found object property key: ${original_name}`);
+                        console.log(`    [i] Property key ${original_name} renamed to: ${new_name}\n`);
+                    }
+                });
+                break;
+            }
+            case 'MemberExpression': {
+                if (node.property?.type === 'Identifier' && !mapping.has(node.property.name)) {
+                    let original_name = node.property.name;
+                    let new_name = name_generator.get_new_member_name();
+                    mapping.set(original_name, new_name);
+
+                    console.log(`[+] Found member property: ${original_name}`);
+                    console.log(`    [i] Member property ${original_name} renamed to: ${new_name}\n`);
+                }
+
+                let target = node.object;
+                while (target && target.type === 'MemberExpression') {
+                    target = target.object;
+                }
+
+                if (target?.type === 'Identifier' && !mapping.has(target.name)) {
+                        let original_name = target.name;
+                        let new_name = name_generator.get_new_variable_name();
+                        mapping.set(original_name, new_name);
+
+                        console.log(`[+] Found member object: ${original_name}`);
+                        console.log(`    [i] Member object ${original_name} renamed to: ${new_name}\n`);
+                }
+                break;
+            }
         }
     });
 
@@ -150,10 +207,47 @@ const apply_mapping = (ast, mapping) => {
         if (node.type === 'Identifier' && mapping.has(node.name)) {
             node.name = mapping.get(node.name);
         }
+
+        if (node.type === 'MemberExpression' &&
+            node.property &&
+            node.property.type === 'Identifier' &&
+            node.computed === false &&
+            mapping.has(node.property.name)) {
+            node.property.name = mapping.get(node.property.name);
+        }
+
+        if (node.type === 'Property' &&
+            node.key &&
+            node.key.type === 'Identifier' &&
+            node.computed === false &&
+            mapping.has(node.key.name)) {
+            node.key.name = mapping.get(node.key.name);
+        }
+
+        if (node.type === 'LabeledStatement' &&
+            node.label &&
+            mapping.has(node.label.name)) {
+            node.label.name = mapping.get(node.label.name);
+        }
+
+        if ((node.type === 'ContinueStatement' || node.type === 'BreakStatement') &&
+            node.label &&
+            mapping.has(node.label.name)) {
+            node.label.name = mapping.get(node.label.name);
+        }
+
+        if ((node.type === 'ImportSpecifier' ||
+             node.type === 'ImportDefaultSpecifier' ||
+             node.type === 'ImportNamespaceSpecifier') &&
+            node.local &&
+            node.local.type === 'Identifier' &&
+            mapping.has(node.local.name)) {
+            node.local.name = mapping.get(node.local.name);
+        }
     });
 
     return ast;
-}
+};
 
 /**
  * Generates code from an AST
@@ -248,7 +342,7 @@ const passes = [
             return;
         }
 
-        const output_filename = arg_handler.get_file_name_from_argv(args.output_arg_index);
+        const output_filename = arg_handler.get_val_from_arg(args.output_arg_index);
         write_to_file(output_filename, generated_code);
         console.log(`[i] Output file written to: ${output_filename}.`);
     } catch (error) {

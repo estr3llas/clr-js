@@ -7,6 +7,24 @@ export const get_new_variable_name = () => {
     return 'v' + new_var_id().toString();
 }
 
+var new_member_id = (() => {
+    var member_id = 0;
+    return function() { return member_id++; };
+})();
+
+export const get_new_member_name = () => {
+    return 'm' + new_member_id().toString();
+}
+
+var new_property_id = (() => {
+    var property_id = 0;
+    return function() { return property_id++; };
+})();
+
+export const get_new_property_id = () => {
+    return 'p' + new_property_id().toString();
+}
+
 var new_sub_id = (() => {
     var sub_id = 0;
     return function() { return sub_id++; };
