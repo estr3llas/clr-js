@@ -6,7 +6,13 @@ export const PROGRAM_OPTIONS = {
     file_arg_index: 0,
 
     output_arg: false,
-    output_arg_index: 0
+    output_arg_index: 0,
+
+    ecma_arg: false,
+    ecma_arg_index: 0,
+
+    strict_arg: false,
+    strict_arg_index: 0,
 }
 
 export const read_args = () => {
@@ -20,11 +26,21 @@ export const read_args = () => {
             PROGRAM_OPTIONS.output_arg = true;
             PROGRAM_OPTIONS.output_arg_index = index;
         }
+
+        if(val.includes('-e') || val.includes('--ecma')) {
+            PROGRAM_OPTIONS.ecma_arg = true;
+            PROGRAM_OPTIONS.ecma_arg_index = index;
+        }
+
+        if(val.includes('-s') || val.includes('--strict')) {
+            PROGRAM_OPTIONS.strict_arg = true;
+            PROGRAM_OPTIONS.strict_arg_index = index;
+        }
     })
     return PROGRAM_OPTIONS
 }
 
-export const get_file_name_from_argv = (idx) => {
+export const get_val_from_arg = (idx) => {
     return process.argv[idx + 1] || null;
 }
 
@@ -41,5 +57,7 @@ export const show_help = () => {
 
         -f, --file          The .js file
         -o, --output        The output file (default is to print on console)
+        -e, --ecma          Specify the ECMA version to use (default is latest)
+        -s, --strict        Disable/Enable "use strict"
         `)
 }

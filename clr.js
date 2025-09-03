@@ -181,15 +181,22 @@ const show_ascii = () => {
     console.log("        ----------\n")
 }
 
+const passes = [
+    { fn: from_raw_to_value, inputs: ['ast'], output: null },
+    { fn: rename_ast, inputs: ['ast'], output: 'mapping' },
+    { fn: apply_mapping, inputs: ['ast', 'mapping'], output: null },
+    { fn: generate_code, inputs: ['ast'], output: 'code' }
+];
+
 (function () {
 
-    let program_options = arg_handler.read_args();
-    if(program_options.file_arg === false) {
+    let args = arg_handler.read_args();
+    if (args.file_arg === false) {
         arg_handler.show_help();
         process.exit(0);
     }
 
-    let obfuscated_file_name = arg_handler.get_file_name_from_argv(program_options.file_arg_index)
+    let obfuscated_file_name = arg_handler.get_val_from_arg(args.file_arg_index)
     let file_buffer = read_file(obfuscated_file_name);
 
     switch(file_buffer) {
@@ -213,14 +220,27 @@ const show_ascii = () => {
 
     try {
         const ast = parse(file_buffer, {
-            ecmaVersion: "latest",
+            ecmaVersion: args.ecma_args 
+                            ? parseInt(arg_handler.get_val_from_arg(args.ecma_arg_index), 10) 
+                            : "latest",
+            strictMode: !!args.strict_arg,
             sourceType: "module"
         });
 
-        from_raw_to_value(ast);
-        const mapping = rename_ast(ast);
-        apply_mapping(ast, mapping);
-        const generated_code = generate_code(ast);
+        const generated_code = ((ast, passes) => {
+            let context = { ast };
+            
+            for (const pass of passes) {
+              const args = pass.inputs.map(input => context[input]);
+              const result = pass.fn(...args);
+              
+              if (pass.output) {
+                context[pass.output] = result;
+              }
+            }
+            
+            return context.code || context.ast;
+        })(ast, passes);
 
         if (program_options.output_arg === false) {
             console.log("[+] Renamed Output:");
